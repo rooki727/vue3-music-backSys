@@ -171,7 +171,7 @@ const checkAccountExist = async () => {
         <el-input v-model="addform.account" autocomplete="off" @blur="checkAccountExist" />
       </el-form-item>
       <el-form-item label="密码" label-width="8.75rem" prop="password">
-        <el-input v-model="addform.password" autocomplete="off" type="password" />
+        <el-input v-model="addform.password" autocomplete="off" type="password" show-password />
       </el-form-item>
 
       <el-form-item label="性别" label-width="8.75rem" prop="gender">

@@ -73,7 +73,7 @@ const beforeUpload = (file) => {
   return isImage // 确保文件是图片
 }
 
-// 上传mp4
+// 上传mp3文件
 const uploadPercentage = ref(0) // 用于存储上传进度
 const progressStatus = ref('') // 进度条状态，'active', 'success', 'exception'
 
@@ -205,7 +205,7 @@ watch(
 </template>
 
 
-<style scoped>
+<style scoped lang="scss">
 .avatar-uploader {
   width: 80px;
   height: 80px;

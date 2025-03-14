@@ -6,7 +6,7 @@ import { useLoginerStore } from '@/stores/LoginerStore'
 import { useRouter } from 'vue-router'
 const Router = useRouter()
 const LoginerStore = useLoginerStore()
-const circleUrl = '/public/avatar.jpg'
+const circleUrl = '/avatar.jpg'
 const route = useRoute()
 const props = defineProps(['isCollapse'])
 const emit = defineEmits(['changeCollapse'])

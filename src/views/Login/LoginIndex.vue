@@ -41,8 +41,7 @@ const onClickLogin = () => {
       account: inputAccount.value,
       password: inputPassword.value,
       token: '1234567890tokenText',
-      avatar:
-        'http://119.29.168.176:8080/library_ssm/static/b930c9ad-0c11-46c0-af8e-467b801a9469_th%20(1).jpg',
+      avatar: '',
       name: 'adminText',
       gender: '男',
       phone: '1234567890',

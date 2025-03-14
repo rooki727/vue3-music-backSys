@@ -12,11 +12,7 @@
     </div>
     <div class="homeRight">
       <div class="userSysInfo">
-        <img
-          :src="loginerStore.userInfo.avatar || '/public/avatar.jpg'"
-          alt="无法加载"
-          class="avatar"
-        />
+        <img :src="loginerStore.userInfo.avatar || '/avatar.jpg'" alt="无法加载" class="avatar" />
         <span class="name">{{ loginerStore.userInfo.name || '未登录' || 'admin' }}</span>
         <div class="sysItem">
           <span>系统：{{ name }}</span>

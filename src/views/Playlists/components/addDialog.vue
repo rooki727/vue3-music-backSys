@@ -95,7 +95,7 @@ const resetForm = () => {
     :close-on-click-modal="false"
   >
     <el-form :model="addform" :rules="rules" ref="addFormRef">
-      <el-form-item label="歌手图片" label-width="8.75rem" prop="playList_img">
+      <el-form-item label="歌单图片" label-width="8.75rem" prop="playList_img">
         <!-- 增加修改图标 -->
         <div style="display: flex">
           <img

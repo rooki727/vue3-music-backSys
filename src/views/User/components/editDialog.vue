@@ -144,7 +144,7 @@ watch(
         <el-input v-model="addform.account" autocomplete="off" />
       </el-form-item>
       <el-form-item label="密码" label-width="8.75rem" prop="password">
-        <el-input v-model="addform.password" autocomplete="off" />
+        <el-input v-model="addform.password" autocomplete="off" type="password" show-password />
       </el-form-item>
       <el-form-item label="性别" label-width="8.75rem" prop="gender">
         <el-radio-group v-model="addform.gender">

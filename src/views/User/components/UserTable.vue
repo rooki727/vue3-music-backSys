@@ -15,7 +15,7 @@
       <el-table-column prop="avatar" label="头像" width="113">
         <template #default="scope">
           <img
-            :src="scope.row.avatar || '/public/avatar.jpg'"
+            :src="scope.row.avatar || '/avatar.jpg'"
             alt=""
             style="width: 100px; height: 100px"
           />

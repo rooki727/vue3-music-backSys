@@ -41,7 +41,7 @@ const changeDialogVisible = (value) => {
 
 // 点击打开添加表单
 const openAddDialog = () => {
-  dialogTitle.value = '添加歌手'
+  dialogTitle.value = '添加歌单'
   changeDialogVisible(true)
 }
 
