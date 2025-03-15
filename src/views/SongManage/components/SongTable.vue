@@ -42,7 +42,7 @@
             ><el-icon size="20px"><EditPen /></el-icon
           ></el-button>
 
-          <el-popconfirm title="确认移除该歌曲吗" @confirm="handleDelete(scope.row)">
+          <el-popconfirm title="确认从库中删除该歌曲吗" @confirm="handleDelete(scope.row)">
             <template #reference>
               <el-button link type="primary" size="default"
                 ><el-icon style="color: red" size="20px"><Delete /></el-icon

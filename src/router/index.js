@@ -11,6 +11,7 @@ import SingerList from '@/views/Singer/SingerList.vue'
 import PlayLists from '@/views/Playlists/PlayLists.vue'
 import SongList from '@/views/SongForm/SongList.vue'
 import CommentList from '@/views/Comment/CommentList.vue'
+import SongManage from '@/views/SongManage/SongManage.vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { useLoginerStore } from '@/stores/LoginerStore'
 
@@ -77,6 +78,11 @@ const router = createRouter({
           path: '/songlist',
           component: SongList,
           name: 'SongList'
+        },
+        {
+          path: '/songmanage', // 歌曲管理
+          component: SongManage,
+          name: 'SongManage'
         },
         {
           path: '/comment', // 评论管理

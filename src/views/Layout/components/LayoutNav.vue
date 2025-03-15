@@ -43,6 +43,17 @@ const props = defineProps(['isCollapse'])
         <span>歌单管理</span>
       </template>
     </el-menu-item>
+    <el-menu-item
+      index="/songmanage"
+      :class="{
+        'is-active': $route.path === '/songmanage' && Object.keys($route.query).length === 0
+      }"
+    >
+      <el-icon><VideoPlay /></el-icon>
+      <template #title>
+        <span>歌曲管理</span>
+      </template>
+    </el-menu-item>
   </el-menu>
 </template>
 
