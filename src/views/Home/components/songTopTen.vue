@@ -7,37 +7,37 @@ import * as echarts from 'echarts'
 import { GridComponent } from 'echarts/components'
 import { BarChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
-import { onMounted, ref, nextTick } from 'vue'
-
+import { ref, nextTick, computed, watch } from 'vue'
+const props = defineProps({
+  songTopList: Array
+})
+const songTopList = computed(() => props.songTopList)
 echarts.use([GridComponent, BarChart, CanvasRenderer])
+const songTopTenList = ref([])
 
-const songTopTenList = ref([
-  { name: '歌曲1', count: 111 },
-  { name: '歌曲2', count: 121 },
-  { name: '歌曲3', count: 131 },
-  { name: '歌曲4', count: 141 },
-  { name: '歌曲5', count: 151 },
-  { name: '歌曲6', count: 161 },
-  { name: '歌曲7', count: 191 },
-  { name: '歌曲8', count: 171 },
-  { name: '歌曲9', count: 181 },
-  { name: '歌曲10', count: 101 }
-])
 // 找到最大值的索引
 const maxIndex = songTopTenList.value.reduce((maxIdx, currentItem, currentIndex, array) => {
   return currentItem.count > array[maxIdx].count ? currentIndex : maxIdx
 }, 0)
 // 处理数据，给最大值的项添加 itemStyle 属性
 const processedData = ref([])
-songTopTenList.value.forEach((item) =>
-  processedData.value.push({
-    value: item.count
-  })
-)
-processedData.value[maxIndex].itemStyle = {
-  color: 'red'
-}
 
+watch(songTopList, (newVal) => {
+  songTopTenList.value = newVal
+  songTopTenList.value.forEach((item) =>
+    processedData.value.push({
+      value: item.count
+    })
+  )
+  if (processedData.value.length > 0) {
+    processedData.value[maxIndex].itemStyle = {
+      color: 'red'
+    }
+  }
+  nextTick(() => {
+    setCharts()
+  })
+})
 // 绘制柱形图
 const setCharts = () => {
   const chartBox = document.querySelector('.songTopTen')
@@ -72,13 +72,6 @@ const setCharts = () => {
   // 手动触发 resize，确保图表尺寸适应容器
   myChart.resize()
 }
-
-// 确保图表在页面渲染完成后正确初始化
-onMounted(() => {
-  nextTick(() => {
-    setCharts()
-  })
-})
 
 // 监听窗口或容器尺寸变化，确保图表动态调整
 window.addEventListener('resize', () => {

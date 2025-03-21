@@ -1,12 +1,12 @@
 <script  setup>
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-// 获取t方法才可以在js代码里使用
+import { addUserAPI } from '@/apis/user'
 // 弹框功能设置
 const props = defineProps(['dialogFormVisible', 'title'])
 const centerDialogVisible = computed(() => props.dialogFormVisible)
 const title = computed(() => props.title)
-const emit = defineEmits(['changeDialogVisible'])
+const emit = defineEmits(['changeDialogVisible', 'updateList'])
 
 const addForm = ref(null)
 const addform = ref({
@@ -19,8 +19,6 @@ const addform = ref({
   email: ''
 })
 
-// 判断账号存在是否
-const accountExists = ref(true)
 const rules = {
   name: [
     {
@@ -102,31 +100,31 @@ const changeDialogVisible = () => {
 }
 const submitadd = (addForm) => {
   addForm.validate((valid) => {
-    if (valid && accountExists.value === false) {
+    if (valid) {
       // const date = new Date()
       // api数据请求，添加该用户的信息
       emit('changeDialogVisible', false)
 
-      // addCommonUser(
-      //   addform.value.name,
-      //   parseInt(addform.value.account),
-      //   addform.value.password,
-      //   addform.value.verify,
-      //   addform.value.gender,
-      //   parseInt(addform.value.phone),
-      //   addform.value.email,
-      //   date
-      // )
-      // .then(() => {
-      //   // 如果 addUser 没有报错，则执行成功提示
-      //   ElMessage({ type: 'success', message: '添加成功' })
-      //   resetForm()
-      // })
-      // .catch(() => {
-      //   // 处理请求失败的情况
-      //   ElMessage({ type: 'erro', message: '添加失败！请检查输入信息' })
-      //   // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-      // })
+      addUserAPI({
+        name: addform.value.name,
+        account: parseInt(addform.value.account),
+        password: addform.value.password,
+        gender: addform.value.gender,
+        phone: parseInt(addform.value.phone),
+        email: addform.value.email
+      })
+        .then(() => {
+          // 如果 addUser 没有报错，则执行成功提示
+          ElMessage({ type: 'success', message: '添加成功' })
+          emit('changeDialogVisible', false)
+          emit('updateList')
+          resetForm()
+        })
+        .catch(() => {
+          // 处理请求失败的情况
+          ElMessage({ type: 'erro', message: '添加失败！请检查输入信息' })
+          // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+        })
     } else {
       // 如果表单验证不通过，提醒
       ElMessage({ type: 'error', message: '添加失败！请检查输入信息' })

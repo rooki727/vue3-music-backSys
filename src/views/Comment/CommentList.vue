@@ -1,9 +1,9 @@
 <script setup>
 import CommentTable from './components/CommentTable.vue'
-import { ref, onMounted } from 'vue'
-
+import { ref, onMounted, provide } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute } from 'vue-router'
+import { getSongCommentAPI, deleteBatchSongCommentAPI } from '@/apis/song'
 import router from '@/router'
 const route = useRoute()
 // 取消按钮时重置点击行
@@ -13,30 +13,25 @@ const song_id = route.query.song_id
 // 搜索功能变量
 const searchInput = ref('')
 // 表格内容
-const commentList = ref([
-  {
-    comment_id: 1,
-    user_id: 1,
-    content: '评论1'
-  },
-  {
-    comment_id: 2,
-    user_id: 2,
-    content: '评论2'
-  }
-])
-
+const commentList = ref([])
+const originalData = ref([])
 // 获取table数据
 const getTableForm = async () => {
   // 请求接口
+  await getSongCommentAPI({ id: song_id }).then((res) => {
+    if (res.code === 200) {
+      commentList.value = res.data
+      originalData.value = res.data
+    }
+  })
 }
+// 提供给子组件的方法
+provide('getTableForm', getTableForm)
 
 // 搜索功能
-// 备份原始数据
-const originalData = [...commentList.value]
 const resetSearch = () => {
   searchInput.value = ''
-  commentList.value = [...originalData]
+  commentList.value = [...originalData.value]
 }
 let debounceTimer = null // 在函数外部定义定时器变量，以保证它在多个调用之间是共享的
 
@@ -49,29 +44,31 @@ const handleSearch = (inputvalue) => {
   debounceTimer = setTimeout(() => {
     // 如果输入为空，恢复原始数据
     if (inputvalue === '') {
-      commentList.value = [...originalData]
+      commentList.value = [...originalData.value]
     } else {
       // 根据输入值过滤数据
-      const filteredData = originalData.filter((item) => item?.user_id == inputvalue)
+      const filteredData = originalData.value.filter((item) => item?.userId == inputvalue)
       // 更新表格数据
       commentList.value = filteredData
     }
-  }, 300) // 300毫秒后触发搜索，可以根据需要调整
+  }, 500) // 500毫秒后触发搜索，可以根据需要调整
 }
-
 // 批量删除功能
 const delTableId = ref([])
 const getDelTable = (value) => {
   delTableId.value = value
   console.log(delTableId.value)
 }
-const blukDel = () => {
+const blukDel = async () => {
   if (delTableId.value.length > 0) {
     // 执行请求操作
-    // delTableId.value.forEach((item) => deleteCommonUser(item))
-    ElMessage({ type: 'success', message: '批量删除成功' })
-    // 删除完后清空数据
-    delTableId.value = []
+    await deleteBatchSongCommentAPI(delTableId.value).then(() => {
+      // 删除成功提示
+      ElMessage({ type: 'success', message: '批量删除成功' })
+      // 删除完后清空数据
+      delTableId.value = []
+      getTableForm()
+    })
   } else {
     ElMessage({
       type: 'error',

@@ -1,23 +1,24 @@
 <script  setup>
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { addPlaylistSongAPI } from '@/apis/playlist'
 // 弹框功能设置
-const props = defineProps(['dialogFormVisible', 'title', 'clickRow', 'cannotInpId'])
+const props = defineProps(['dialogFormVisible', 'title', 'clickRow', 'cannotInpId', 'playList_id'])
 const centerDialogVisible = computed(() => props.dialogFormVisible)
 const title = computed(() => props.title)
-const emit = defineEmits(['changeDialogVisible', 'updateClickRow'])
+const emit = defineEmits(['changeDialogVisible', 'updateClickRow', 'updateList'])
 const changeDialogVisible = () => {
   emit('changeDialogVisible', false)
 }
 const addFormRef = ref(null)
 const addform = ref({
-  song_img: '',
-  song_name: '',
-  song_file: '',
+  img: '',
+  name: '',
+  file: '',
   album: ''
 })
 const rules = {
-  song_name: [
+  name: [
     {
       required: true,
       message: '请输入歌曲名字',
@@ -35,25 +36,29 @@ const rules = {
 const submitadd = (addFormRef) => {
   addFormRef.validate((valid) => {
     if (valid) {
-      console.log(addform.value)
-
-      resetForm()
       // api数据请求，添加该用户的信息
       emit('changeDialogVisible', false)
-
-      //  addSinger(
-
-      //     )
-      //     .then(() => {
-      //       // 如果 addUser 没有报错，则执行成功提示
-      //       ElMessage({ type: 'success', message: '添加成功' })
-
-      //     })
-      //     .catch(() => {
-      //       // 处理请求失败的情况
-      //       ElMessage({ type: 'erro', message: '修改失败！请检查输入信息' })
-      //       // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-      //     })
+      addPlaylistSongAPI({
+        id: props.playList_id,
+        data: {
+          img: addform.value.img,
+          name: addform.value.name,
+          file: addform.value.file,
+          album: addform.value.album
+        }
+      })
+        .then(() => {
+          // 如果 addUser 没有报错，则执行成功提示
+          ElMessage({ type: 'success', message: '添加成功' })
+          resetForm()
+          emit('changeDialogVisible', false)
+          emit('updateList')
+        })
+        .catch(() => {
+          // 处理请求失败的情况
+          ElMessage({ type: 'erro', message: '修改失败！请检查输入信息' })
+          // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+        })
     } else {
       // 如果表单验证不通过，提醒
       ElMessage({ type: 'error', message: '修改失败！请检查输入信息' })
@@ -62,7 +67,7 @@ const submitadd = (addFormRef) => {
 }
 // 上传图片
 const handleAvatarSuccess = (response) => {
-  addform.value.song_img = response.result
+  addform.value.img = response.data
 }
 // 上传图片前的校验
 const beforeUpload = (file) => {
@@ -103,7 +108,7 @@ const beforeUploadAudio = (file) => {
 const handleSuccess = (response, file, fileList) => {
   console.log('上传成功', response, file, fileList)
   progressStatus.value = 'success' // 上传成功，设置进度条状态为成功
-  addform.value.song_file = response.result
+  addform.value.file = response.data
 }
 
 // 上传失败
@@ -133,18 +138,13 @@ const resetForm = () => {
     :close-on-click-modal="false"
   >
     <el-form :model="addform" :rules="rules" ref="addFormRef">
-      <el-form-item label="歌曲图片" label-width="8.75rem" prop="song_img">
+      <el-form-item label="歌曲图片" label-width="8.75rem" prop="img">
         <!-- 增加修改图标 -->
         <div style="display: flex">
-          <img
-            style="width: 80px; height: 80px"
-            v-if="addform.song_img"
-            :src="addform.song_img"
-            alt=""
-          />
+          <img style="width: 80px; height: 80px" v-if="addform.img" :src="addform.img" alt="" />
           <el-upload
             class="avatar-uploader"
-            action="http://119.29.168.176:8080/library_ssm/file/uploadPicture"
+            action="http://localhost:8080/api/file/uploadImage"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeUpload"
@@ -154,12 +154,12 @@ const resetForm = () => {
           </el-upload>
         </div>
       </el-form-item>
-      <el-form-item label="新的歌曲文件" label-width="8.75rem" prop="song_file">
+      <el-form-item label="新的歌曲文件" label-width="8.75rem" prop="file">
         <div>
           <!-- 上传组件 -->
           <el-upload
             class="upload-demo"
-            action="http://119.29.168.176:8080/library_ssm/file/uploadPicture"
+            action="http://localhost:8080/api/file/uploadSnog"
             :on-progress="handleProgress"
             :before-upload="beforeUploadAudio"
             :on-success="handleSuccess"
@@ -167,7 +167,7 @@ const resetForm = () => {
             :show-file-list="false"
             name="song"
           >
-            <span class="el-upload__text" v-if="addform.song_file">{{ addform.song_file }}</span>
+            <span class="el-upload__text" v-if="addform.file">{{ addform.file }}</span>
             <el-button> 点击上传歌曲文件 </el-button>
           </el-upload>
 
@@ -182,8 +182,8 @@ const resetForm = () => {
           ></el-progress>
         </div>
       </el-form-item>
-      <el-form-item label="歌名" label-width="8.75rem" prop="song_name">
-        <el-input v-model="addform.song_name" autocomplete="off" />
+      <el-form-item label="歌名" label-width="8.75rem" prop="name">
+        <el-input v-model="addform.name" autocomplete="off" />
       </el-form-item>
       <el-form-item label="专辑" label-width="8.75rem" prop="album">
         <el-input v-model="addform.album" autocomplete="off" />

@@ -6,31 +6,32 @@
     :dialogFormVisible="dialogFormVisible"
     @updateClickRow="updateClickRow"
     @changeDialogVisible="changeDialogVisible"
+    @updateList="updateList"
   ></editDialog>
 
   <div>
     <el-table :data="currentPageData" style="width: 100%" @selection-change="handleSelectionChange">
       <el-table-column width="40" type="selection" />
-      <el-table-column fixed prop="song_id" label="song_id" width="100" />
+      <el-table-column fixed prop="id" label="id" width="100" />
 
-      <el-table-column prop="song_img" label="歌曲图片" width="113">
+      <el-table-column prop="img" label="歌曲图片" width="113">
         <template #default="scope">
           <div style="display: flex; flex-direction: column; align-items: center">
             <img
-              :src="scope.row.song_img || '/singer-default.png'"
+              :src="scope.row.img || '/singer-default.png'"
               alt=""
               style="width: 100px; height: 100px"
             />
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="song_name" label="歌名" width="420" />
+      <el-table-column prop="name" label="歌名" width="420" />
       <el-table-column prop="album" label="专辑" width="360" />
 
       <el-table-column label="评论管理" width="150">
         <template #default="scope">
           <router-link
-            :to="`/comment?song_id=${scope.row.song_id}`"
+            :to="`/comment?song_id=${scope.row.id}`"
             style="text-decoration: none; color: rgb(3, 178, 247)"
             >评论管理</router-link
           >
@@ -69,9 +70,13 @@
 
 <script setup>
 import editDialog from './editDialog.vue'
-import { computed, ref } from 'vue'
-// import { ElMessage } from 'element-plus'
-// 获取t方法才可以在js代码里使用
+import { computed, ref, inject } from 'vue'
+import { ElMessage } from 'element-plus'
+import { removeSongAPI } from '@/apis/playlist'
+const getTableForm = inject('getTableForm')
+const updateList = () => {
+  getTableForm()
+}
 
 // 添加对话框
 const dialogTitle = ref('')
@@ -90,6 +95,9 @@ const updateClickRow = (newValue) => {
 const props = defineProps({
   songList: {
     type: Array
+  },
+  playList_id: {
+    type: Number
   }
 })
 
@@ -107,16 +115,7 @@ const currentPageData = computed(() => {
   const endIndex = startIndex + pageSize.value
   return computedtable.value?.slice(startIndex, endIndex)
 })
-// watch(
-//   () => computedtable.value,
-//   (newVal) => {
-//     totalUser.value = newVal
-//     console.log(totalUser.value)
-//   },
-//   {
-//     deep: true
-//   }
-// )
+
 // 获取选择框的内容
 const multipleSelection = ref([])
 const emit = defineEmits(['getDelTable'])
@@ -126,7 +125,7 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
   if (multipleSelection.value.length > 0) {
     // 使用map方法遍历multipleSelection.value数组，并将每个选中项的id存储到一个新的数组中
-    const selectedIds = multipleSelection.value.map((item) => item.song_id)
+    const selectedIds = multipleSelection.value.map((item) => item.id)
     // 将所选数据提供给父组件
     emit('getDelTable', selectedIds)
   }
@@ -141,18 +140,19 @@ const handleEdit = (row) => {
 }
 
 const handleDelete = async (row) => {
-  console.log(row.song_id)
+  console.log(row.id)
   // 在这里使用 row 数据执行删除操作
   // api服务器删除后重新获取列表
-  // deleteCommonUser(row.song_id)
-  //   .then(() => {
-  //     ElMessage({ type: 'success', message: '删除成功' })
-  //   })
-  //   .catch((error) => {
-  //     // 处理请求失败的情况
-  //     ElMessage({ type: 'erro', message: error })
-  //     // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-  //   })
+  removeSongAPI({ id: props.playList_id, cid: row.id })
+    .then(() => {
+      ElMessage({ type: 'success', message: '删除成功' })
+      getTableForm()
+    })
+    .catch((error) => {
+      // 处理请求失败的情况
+      ElMessage({ type: 'erro', message: error })
+      // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+    })
 }
 </script>
 

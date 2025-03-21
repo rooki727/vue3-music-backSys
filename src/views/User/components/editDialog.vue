@@ -1,21 +1,21 @@
 <script  setup>
 import { reactive, computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { updateUserAPI } from '@/apis/user'
 // 弹框功能设置
 const props = defineProps(['dialogFormVisible', 'title', 'clickRow', 'cannotInpId'])
 const centerDialogVisible = computed(() => props.dialogFormVisible)
 const title = computed(() => props.title)
 const clickRow = computed(() => props.clickRow)
-const emit = defineEmits(['changeDialogVisible', 'updateClickRow'])
+const emit = defineEmits(['changeDialogVisible', 'updateClickRow', 'updateList'])
 const changeDialogVisible = () => {
   emit('updateClickRow', {}) // 发送事件给父组件，请求修改props.clickRow的值为null
   emit('changeDialogVisible', false)
 }
 const addForm = ref(null)
 const addform = reactive({
-  user_id: null,
+  id: null,
   name: '',
-  account: null,
   password: '',
   verify: '',
   gender: '',
@@ -30,25 +30,7 @@ const rules = {
       trigger: 'blur'
     }
   ],
-  account: [
-    {
-      required: true,
-      message: '请输入账号',
-      trigger: 'blur'
-    },
-    {
-      type: Number,
-      min: 6,
-      message: '最少6位阿拉伯数字',
-      trigger: 'blur'
-    }
-  ],
   password: [
-    {
-      required: true,
-      message: '请输入密码',
-      trigger: 'blur'
-    },
     {
       pattern: /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
       message: '密码为至少8位，包含字母和数字',
@@ -89,25 +71,25 @@ const submitadd = (addForm) => {
 
       // api数据请求，添加该用户的信息
       emit('changeDialogVisible', false)
-      //  updateCommonUser(
-      //       addform.user_id,
-      //       addform.name,
-      //       parseInt(addform.account),
-      //       addform.password,
-      //       addform.verify,
-      //       addform.gender,
-      //       parseInt(addform.phone),
-      //       addform.email
-      //     )
-      //     .then(() => {
-      //       // 如果 addUser 没有报错，则执行成功提示
-      //       ElMessage({ type: 'success', message: '修改成功' })
-      //     })
-      //     .catch(() => {
-      //       // 处理请求失败的情况
-      //       ElMessage({ type: 'erro', message: '修改失败！请检查输入信息' })
-      //       // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-      //     })
+      updateUserAPI({
+        id: addform.id,
+        name: addform.name,
+        password: addform.password ? addform.password : null,
+        gender: addform.gender,
+        phone: parseInt(addform.phone),
+        email: addform.email
+      })
+        .then(() => {
+          // 如果 addUser 没有报错，则执行成功提示
+          ElMessage({ type: 'success', message: '修改成功' })
+          emit('changeDialogVisible', false)
+          emit('updateList')
+        })
+        .catch(() => {
+          // 处理请求失败的情况
+          ElMessage({ type: 'erro', message: '修改失败！请检查输入信息' })
+          // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+        })
     } else {
       // 如果表单验证不通过，提醒
       ElMessage({ type: 'error', message: '修改失败！请检查输入信息' })
@@ -134,14 +116,11 @@ watch(
     :close-on-click-modal="false"
   >
     <el-form :model="addform" :rules="rules" ref="addForm">
-      <el-form-item label="user_id" label-width="8.75rem" prop="user_id">
-        <el-input v-model="addform.user_id" autocomplete="off" :disabled="cannotInpId" />
+      <el-form-item label="id" label-width="8.75rem" prop="id">
+        <el-input v-model="addform.id" autocomplete="off" :disabled="cannotInpId" />
       </el-form-item>
       <el-form-item label="用户名" label-width="8.75rem" prop="name">
         <el-input v-model="addform.name" autocomplete="off" />
-      </el-form-item>
-      <el-form-item label="账号" label-width="8.75rem" prop="account">
-        <el-input v-model="addform.account" autocomplete="off" />
       </el-form-item>
       <el-form-item label="密码" label-width="8.75rem" prop="password">
         <el-input v-model="addform.password" autocomplete="off" type="password" show-password />

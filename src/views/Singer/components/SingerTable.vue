@@ -6,18 +6,19 @@
     :dialogFormVisible="dialogFormVisible"
     @updateClickRow="updateClickRow"
     @changeDialogVisible="changeDialogVisible"
+    @updateList="updateList"
   ></editDialog>
 
   <div>
     <el-table :data="currentPageData" style="width: 100%" @selection-change="handleSelectionChange">
       <el-table-column width="40" type="selection" />
-      <el-table-column fixed prop="singer_id" label="singer_id" width="100" />
+      <el-table-column fixed prop="id" label="id" width="100" />
 
-      <el-table-column prop="singer_img" label="歌手图片" width="113">
+      <el-table-column prop="img" label="歌手图片" width="113">
         <template #default="scope">
           <div style="display: flex; flex-direction: column; align-items: center">
             <img
-              :src="scope.row.singer_img || '/singer-default.png'"
+              :src="scope.row.img || '/singer-default.png'"
               alt=""
               style="width: 100px; height: 100px"
             />
@@ -29,15 +30,6 @@
       <el-table-column prop="birthday" label="生日" width="150" />
       <el-table-column prop="country" label="地区" width="150" />
       <el-table-column prop="introduction" label="简介" width="500" style="overflow: auto" />
-      <el-table-column label="歌曲管理" width="100">
-        <template #default="scope">
-          <router-link
-            :to="`/songlist?singer_id=${scope.row.singer_id}`"
-            style="text-decoration: none; color: rgb(3, 178, 247)"
-            >歌曲管理</router-link
-          >
-        </template>
-      </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="handleEdit(scope.row)"
@@ -71,9 +63,9 @@
 
 <script setup>
 import editDialog from './editDialog.vue'
-import { computed, ref } from 'vue'
-// import { ElMessage } from 'element-plus'
-// 获取t方法才可以在js代码里使用
+import { computed, ref, inject } from 'vue'
+import { ElMessage } from 'element-plus'
+import { deleteSingerAPI } from '@/apis/singer'
 
 // 添加对话框
 const dialogTitle = ref('')
@@ -83,6 +75,10 @@ const clickRow = ref({})
 const cannotInpId = ref(true)
 const changeDialogVisible = (value) => {
   dialogFormVisible.value = value
+}
+const getTableForm = inject('getTableForm')
+const updateList = () => {
+  getTableForm()
 }
 // 取消按钮时重置点击行
 const updateClickRow = (newValue) => {
@@ -128,7 +124,7 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
   if (multipleSelection.value.length > 0) {
     // 使用map方法遍历multipleSelection.value数组，并将每个选中项的id存储到一个新的数组中
-    const selectedIds = multipleSelection.value.map((item) => item.singer_id)
+    const selectedIds = multipleSelection.value.map((item) => item.id)
     // 将所选数据提供给父组件
     emit('getDelTable', selectedIds)
   }
@@ -143,19 +139,20 @@ const handleEdit = (row) => {
 }
 
 const handleDelete = async (row) => {
-  console.log(row.singer_id)
+  console.log(row.id)
 
   // 在这里使用 row 数据执行删除操作
   // api服务器删除后重新获取列表
-  // deleteCommonUser(row.singer_id)
-  //   .then(() => {
-  //     ElMessage({ type: 'success', message: '删除成功' })
-  //   })
-  //   .catch((error) => {
-  //     // 处理请求失败的情况
-  //     ElMessage({ type: 'erro', message: error })
-  //     // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-  //   })
+  deleteSingerAPI(row.id)
+    .then(() => {
+      ElMessage({ type: 'success', message: '删除成功' })
+      getTableForm()
+    })
+    .catch((error) => {
+      // 处理请求失败的情况
+      ElMessage({ type: 'erro', message: error })
+      // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+    })
 }
 </script>
 

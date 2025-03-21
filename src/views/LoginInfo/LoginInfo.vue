@@ -29,11 +29,6 @@
         :class="{ 'is-active': $route.path === '/loginInfo/passwordmanagement' }"
         >修改密码</el-menu-item
       >
-      <el-menu-item
-        index="/loginInfo/cancelaccount"
-        :class="{ 'is-active': $route.path === '/loginInfo/cancelaccount' }"
-        >注销账号</el-menu-item
-      >
     </el-menu>
   </div>
   <RouterView></RouterView>

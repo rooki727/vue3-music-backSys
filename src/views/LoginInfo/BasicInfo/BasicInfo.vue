@@ -2,6 +2,8 @@
 import { useLoginerStore } from '@/stores/LoginerStore'
 import { ref, reactive, onMounted } from 'vue'
 import DialogTip from '@/components/DialogTip.vue'
+import { updateBasicInfoAPI } from '@/apis/admin'
+import { ElMessage } from 'element-plus'
 // 获取t方法才可以在js代码里使用
 const LoginerStore = useLoginerStore()
 const userForm = reactive({
@@ -18,8 +20,7 @@ const rules = {
       required: true,
       message: '请输入用户名',
       trigger: 'blur'
-    },
-    { min: 5, message: '用户名长度不能小于5个字符', trigger: 'blur' }
+    }
   ],
   phone: [
     {
@@ -55,13 +56,18 @@ const submitForm = (formRef) => {
   formRef.validate((valid) => {
     if (valid) {
       // 如果表单验证通过，可以继续执行提交逻辑
-      // updateupdateBase(
-      //   userForm.id,
-      //   userForm.name,
-      //   userForm.gender,
-      //   parseInt(userForm.phone),
-      //   userForm.email
-      // )
+      updateBasicInfoAPI({
+        name: userForm.name,
+        gender: userForm.gender,
+        phone: parseInt(userForm.phone),
+        email: userForm.email
+      }).then(() => {
+        LoginerStore.userInfo.name = userForm.name
+        LoginerStore.userInfo.gender = userForm.gender
+        LoginerStore.userInfo.phone = userForm.phone
+        LoginerStore.userInfo.email = userForm.email
+        ElMessage.success('更新成功')
+      })
     } else {
       // 如果表单验证不通过，出现dialog并且提醒
       centerDialogVisible.value = true
@@ -101,12 +107,6 @@ onMounted(() => {
       style="max-width: 600px; font-size: 1rem"
       label-width="auto"
     >
-      <el-form-item label="id"
-        ><el-text>{{ LoginerStore.userInfo?.id }}</el-text></el-form-item
-      >
-      <el-form-item label="账号"
-        ><el-text>{{ LoginerStore.userInfo?.account }}</el-text></el-form-item
-      >
       <el-form-item label="用户名" prop="name">
         <el-input v-model="userForm.name" placeholder="请输入用户名"
       /></el-form-item>

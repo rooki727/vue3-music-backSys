@@ -6,11 +6,12 @@
     :dialogFormVisible="dialogFormVisible"
     @updateClickRow="updateClickRow"
     @changeDialogVisible="changeDialogVisible"
+    @updateList="updateList"
   ></editDialog>
   <div>
     <el-table :data="currentPageData" style="width: 100%" @selection-change="handleSelectionChange">
       <el-table-column width="40" type="selection" />
-      <el-table-column fixed prop="user_id" label="user_id" width="100" />
+      <el-table-column fixed prop="id" label="id" width="100" />
 
       <el-table-column prop="avatar" label="头像" width="113">
         <template #default="scope">
@@ -61,10 +62,9 @@
 
 <script setup>
 import editDialog from './editDialog.vue'
-import { computed, ref } from 'vue'
-
-// import { ElMessage } from 'element-plus'
-// 获取t方法才可以在js代码里使用
+import { computed, ref, inject } from 'vue'
+import { deleteUserAPI } from '@/apis/user'
+import { ElMessage } from 'element-plus'
 
 // 添加对话框
 const dialogTitle = ref('')
@@ -99,16 +99,10 @@ const currentPageData = computed(() => {
   const endIndex = startIndex + pageSize.value
   return computedtable.value.slice(startIndex, endIndex)
 })
-// watch(
-//   () => computedtable.value,
-//   (newVal) => {
-//     totalUser.value = newVal
-//     console.log(totalUser.value)
-//   },
-//   {
-//     deep: true
-//   }
-// )
+const getTableForm = inject('getTableForm')
+const updateList = () => {
+  getTableForm()
+}
 // 获取选择框的内容
 const multipleSelection = ref([])
 const emit = defineEmits(['getDelTable'])
@@ -118,7 +112,7 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
   if (multipleSelection.value.length > 0) {
     // 使用map方法遍历multipleSelection.value数组，并将每个选中项的id存储到一个新的数组中
-    const selectedIds = multipleSelection.value.map((item) => item.user_id)
+    const selectedIds = multipleSelection.value.map((item) => item.id)
     // 将所选数据提供给父组件
     emit('getDelTable', selectedIds)
   }
@@ -133,19 +127,18 @@ const handleEdit = (row) => {
 }
 
 const handleDelete = async (row) => {
-  console.log(row.user_id)
-
   // 在这里使用 row 数据执行删除操作
   // api服务器删除后重新获取列表
-  // deleteCommonUser(row.user_id)
-  //   .then(() => {
-  //     ElMessage({ type: 'success', message: '删除成功' })
-  //   })
-  //   .catch((error) => {
-  //     // 处理请求失败的情况
-  //     ElMessage({ type: 'erro', message: error })
-  //     // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-  //   })
+  deleteUserAPI(row.id)
+    .then(() => {
+      ElMessage({ type: 'success', message: '删除成功' })
+      getTableForm()
+    })
+    .catch((error) => {
+      // 处理请求失败的情况
+      ElMessage({ type: 'erro', message: error })
+      // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+    })
 }
 </script>
 

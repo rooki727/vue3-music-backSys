@@ -1,38 +1,26 @@
 <script setup>
 import playListTable from './components/playListTable.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import addDialog from './components/addDialog.vue'
 import { ElMessage } from 'element-plus'
-
-// 获取t方法才可以在js代码里使用
-
+import { getPlaylistListAPI, deleteBatchPlaylistAPI } from '@/apis/playlist'
 // 搜索功能变量
 const searchInput = ref('')
 const dialogTitle = ref('')
 // 表格内容
-const playList = ref([
-  {
-    playList_id: 1,
-    playList_img:
-      'http://119.29.168.176:8080/library_ssm/static/5dbdd384-b94e-4727-80ac-632a931b0eea_th.jpg',
-    title: '歌单1',
-    style: '欧美',
-    introduction: '我太帅咯'
-  },
-  {
-    playList_id: 2,
-    playList_img: '',
-    title: '歌单2',
-    style: '古风',
-    introduction: '我太帅咯'
-  }
-])
-
+const playList = ref([])
+const originalData = ref([])
 // 获取table数据
 const getTableForm = async () => {
   // 请求接口
+  const res = await getPlaylistListAPI()
+  if (res.code === 200) {
+    playList.value = res.data
+    originalData.value = res.data
+  }
 }
-
+// 使用 provide 暴露父组件的方法
+provide('getTableForm', getTableForm)
 // 添加对话框
 const dialogFormVisible = ref(false)
 const changeDialogVisible = (value) => {
@@ -46,11 +34,9 @@ const openAddDialog = () => {
 }
 
 // 搜索功能
-// 备份原始数据
-const originalData = [...playList.value]
 const resetSearch = () => {
   searchInput.value = ''
-  playList.value = [...originalData]
+  playList.value = [...originalData.value]
 }
 let debounceTimer = null // 在函数外部定义定时器变量，以保证它在多个调用之间是共享的
 
@@ -63,14 +49,14 @@ const handleSearch = (inputvalue) => {
   debounceTimer = setTimeout(() => {
     // 如果输入为空，恢复原始数据
     if (inputvalue === '') {
-      playList.value = [...originalData]
+      playList.value = [...originalData.value]
     } else {
       // 根据输入值过滤数据
-      const filteredData = originalData.filter((item) => item?.title?.includes(inputvalue))
+      const filteredData = originalData.value.filter((item) => item?.title?.includes(inputvalue))
       // 更新表格数据
       playList.value = filteredData
     }
-  }, 300) // 300毫秒后触发搜索，可以根据需要调整
+  }, 500) // 500毫秒后触发搜索，可以根据需要调整
 }
 
 // 批量删除功能
@@ -79,11 +65,13 @@ const getDelTable = (value) => {
   delTableId.value = value
   console.log(delTableId.value)
 }
-const blukDel = () => {
+const blukDel = async () => {
   if (delTableId.value.length > 0) {
     // 执行请求操作
-    // delTableId.value.forEach((item) => deleteCommonUser(item))
+    await deleteBatchPlaylistAPI(delTableId.value)
     ElMessage({ type: 'success', message: '批量删除成功' })
+    // 刷新数据
+    getTableForm()
     // 删除完后清空数据
     delTableId.value = []
   } else {
@@ -105,6 +93,7 @@ onMounted(() => {
     :title="dialogTitle"
     :dialogFormVisible="dialogFormVisible"
     @changeDialogVisible="changeDialogVisible"
+    @updateList="getTableForm"
   ></addDialog>
   <div class="search">
     <el-input

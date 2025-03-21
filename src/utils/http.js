@@ -3,9 +3,9 @@ import { ElMessage } from 'element-plus'
 import 'element-plus/theme-chalk/el-message.css'
 import router from '@/router'
 import { useLoginerStore } from '@/stores/LoginerStore'
-import { refreshTokenAPI } from '@/apis/token'
+// import { refreshTokenAPI } from 'apis/admin'
 const httpInstance = axios.create({
-  baseURL: '',
+  baseURL: 'http://localhost:8080',
   timeout: 5000
 })
 
@@ -47,26 +47,26 @@ httpInstance.interceptors.response.use(
     if (response.data.code === '-403') {
       if (isTokenAboutToExpire(loginerStore.userInfo.token)) {
         console.log('Token 即将过期，尝试刷新 token')
-        try {
-          const res = await refreshTokenAPI(
-            loginerStore.userInfo.id,
-            loginerStore.userInfo.refreshToken
-          )
-          loginerStore.userInfo = res
-          // 重新前一请求
-          await httpInstance.request(response.config).then((res) => {
-            loginerStore.getNewLoginer(loginerStore.userInfo.id)
-            return res.data
-          })
-        } catch (error) {
-          console.error('Token 刷新失败', error)
-          ElMessage({
-            type: 'error',
-            message: '刷新 token 失败，请重新登录'
-          })
-          loginerStore.clearUser()
-          router.push('/login')
-        }
+        // try {
+        //   const res = await refreshTokenAPI(
+        //     loginerStore.userInfo.id,
+        //     loginerStore.userInfo.refreshToken
+        //   )
+        //   loginerStore.userInfo = res
+        //   // 重新前一请求
+        //   await httpInstance.request(response.config).then((res) => {
+        //     loginerStore.getNewLoginer(loginerStore.userInfo.id)
+        //     return res.data
+        //   })
+        // } catch (error) {
+        //   console.error('Token 刷新失败', error)
+        //   ElMessage({
+        //     type: 'error',
+        //     message: '刷新 token 失败，请重新登录'
+        //   })
+        //   loginerStore.clearUser()
+        //   router.push('/login')
+        // }
       } else {
         ElMessage({
           type: 'warning',

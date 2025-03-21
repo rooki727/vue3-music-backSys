@@ -1,10 +1,9 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useLoginerStore } from '@/stores/LoginerStore'
-// import { updatePasswordAPI } from '@/apis/login'
+import { updatePasswordAPI } from '@/apis/admin'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-// import { getCaptchaAPI } from '@/apis/user'
 // 获取t方法才可以在js代码里使用
 const ruleForm = reactive({
   Oripass: '',
@@ -14,11 +13,6 @@ const ruleForm = reactive({
 })
 const router = useRouter()
 const LoginerStore = useLoginerStore()
-// const LoginerId = computed(() => LoginerStore.userInfo.id)
-const LoginerOriPassword = computed(() => LoginerStore.userInfo.password)
-// 图片验证码
-const getcaptcha = ref([])
-const captchaString = computed(() => getcaptcha.value.map((item) => item.value).join(''))
 // 对象dom
 const ruleFormRef = ref()
 // 确定密码函数
@@ -37,27 +31,28 @@ const changeDialogVisible = (value) => {
   centerDialogVisible.value = value
 }
 const submitForm = (formRef) => {
+  console.log('submitForm')
+
   // 调用表单的 validate 方法进行验证
   formRef.validate(async (valid) => {
+    console.log('valid', valid)
+
     if (valid) {
       // 如果表单验证通过，可以继续执行提交逻辑
       // 进行api提交
-      if (ruleForm.Oripass === LoginerOriPassword.value) {
-        // await updatePasswordAPI(LoginerId.value, ruleForm.pass)
-        ElMessage({
-          message: '修改密码成功',
-          type: 'success',
-          plain: true
-        })
-        router.replace('/login')
-        LoginerStore.clearUser()
-      } else {
-        ElMessage({
-          message: '原密码错误',
-          type: 'error',
-          plain: true
-        })
-      }
+      await updatePasswordAPI({ oldPassword: ruleForm.Oripass, newPassword: ruleForm.pass }).then(
+        (res) => {
+          if (res.code === 200) {
+            ElMessage({
+              message: '修改密码成功',
+              type: 'success',
+              plain: true
+            })
+            router.replace('/login')
+            LoginerStore.clearUser()
+          }
+        }
+      )
     } else {
       // 如果表单验证不通过，出现dialog并且提醒
       centerDialogVisible.value = true
@@ -83,19 +78,6 @@ const rules = {
   checkPass: [
     { required: true, message: '请确认新密码', trigger: 'blur' },
     { validator: validateConfirm, trigger: 'blur' }
-  ],
-  captcha: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value !== captchaString.value) {
-          callback(new Error('验证码错误'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
   ]
 }
 
@@ -148,20 +130,6 @@ onMounted(() => generateCaptcha())
           autocomplete="off"
           placeholder="请再次输入密码"
         />
-      </el-form-item>
-      <el-form-item label="验证码" prop="captcha">
-        <el-input v-model="ruleForm.captcha" style="width: 7rem" placeholder="请输入验证码" />
-        <el-button class="captcha-box" @click="generateCaptcha">
-          <el-link
-            v-for="(char, index) in getcaptcha"
-            :key="index"
-            class="captcha-char"
-            :style="{
-              transform: `rotate(${char.rotation}deg) translateX(${char.position}px)`
-            }"
-            >{{ char.value }}</el-link
-          >
-        </el-button>
       </el-form-item>
       <el-form-item>
         <el-button

@@ -2,8 +2,8 @@
   <div>
     <el-table :data="currentPageData" style="width: 100%" @selection-change="handleSelectionChange">
       <el-table-column width="40" type="selection" />
-      <el-table-column fixed prop="comment_id" label="comment_id" width="150" />
-      <el-table-column prop="user_id" label="用户id" width="200" />
+      <el-table-column fixed prop="id" label="id" width="150" />
+      <el-table-column prop="userId" label="用户id" width="200" />
       <el-table-column prop="content" label="内容" width="860" />
       <el-table-column fixed="right" label="操作" width="200">
         <template #default="scope">
@@ -33,14 +33,15 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-
+import { computed, ref, inject } from 'vue'
+import { deleteSongCommentAPI } from '@/apis/song'
+import { ElMessage } from 'element-plus'
 const props = defineProps({
   commentList: {
     type: Array
   }
 })
-
+const getTableForm = inject('getTableForm')
 // 分页功能
 const pageSize = ref(6)
 const small = ref(false)
@@ -55,16 +56,7 @@ const currentPageData = computed(() => {
   const endIndex = startIndex + pageSize.value
   return computedtable.value?.slice(startIndex, endIndex)
 })
-// watch(
-//   () => computedtable.value,
-//   (newVal) => {
-//     totalUser.value = newVal
-//     console.log(totalUser.value)
-//   },
-//   {
-//     deep: true
-//   }
-// )
+
 // 获取选择框的内容
 const multipleSelection = ref([])
 const emit = defineEmits(['getDelTable'])
@@ -74,26 +66,27 @@ const handleSelectionChange = (val) => {
   multipleSelection.value = val
   if (multipleSelection.value.length > 0) {
     // 使用map方法遍历multipleSelection.value数组，并将每个选中项的id存储到一个新的数组中
-    const selectedIds = multipleSelection.value.map((item) => item.comment_id)
+    const selectedIds = multipleSelection.value.map((item) => item.id)
     // 将所选数据提供给父组件
     emit('getDelTable', selectedIds)
   }
 }
 
 const handleDelete = async (row) => {
-  console.log(row.comment_id)
+  console.log(row.id)
 
   // 在这里使用 row 数据执行删除操作
   // api服务器删除后重新获取列表
-  // deleteCommonUser(row.comment_id)
-  //   .then(() => {
-  //     ElMessage({ type: 'success', message: '删除成功' })
-  //   })
-  //   .catch((error) => {
-  //     // 处理请求失败的情况
-  //     ElMessage({ type: 'erro', message: error })
-  //     // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-  //   })
+  deleteSongCommentAPI(row.id)
+    .then(() => {
+      ElMessage({ type: 'success', message: '删除成功' })
+      getTableForm()
+    })
+    .catch((error) => {
+      // 处理请求失败的情况
+      ElMessage({ type: 'erro', message: error })
+      // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+    })
 }
 </script>
 

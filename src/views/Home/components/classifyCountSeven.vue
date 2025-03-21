@@ -8,7 +8,7 @@ import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/compo
 import { PieChart } from 'echarts/charts'
 import { LabelLayout } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, nextTick, computed, watch } from 'vue'
 echarts.use([
   TitleComponent,
   TooltipComponent,
@@ -17,17 +17,24 @@ echarts.use([
   CanvasRenderer,
   LabelLayout
 ])
+const props = defineProps({
+  styleTopList: Array
+})
+const styleTopList = computed(() => props.styleTopList)
+const styleTopListUse = ref([])
 
-const songTopTenList = ref([
-  { name: '类别1', value: 111 },
-  { name: '类别2', value: 121 },
-  { name: '类别3', value: 131 },
-  { name: '类别4', value: 141 },
-  { name: '类别5', value: 151 },
-  { name: '类别6', value: 161 },
-  { name: '类别7', value: 191 }
-])
+watch(styleTopList, (newVal) => {
+  newVal.forEach((item) => {
+    styleTopListUse.value.push({
+      name: item.name,
+      value: item.count
+    })
+  })
 
+  nextTick(() => {
+    setCharts()
+  })
+})
 // 绘制图
 const setCharts = () => {
   const chartBox = document.querySelector('.classifyCountSeven')
@@ -43,7 +50,7 @@ const setCharts = () => {
   // 绘制图表
   myChart.setOption({
     title: {
-      text: '歌曲类别数量Top7',
+      text: '歌单热播Top7',
       subtext: 'Fake Data',
       left: 'center'
     },
@@ -59,7 +66,7 @@ const setCharts = () => {
         name: 'Access From',
         type: 'pie',
         radius: '50%',
-        data: songTopTenList.value,
+        data: styleTopListUse.value,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -74,13 +81,6 @@ const setCharts = () => {
   // 手动触发 resize，确保图表尺寸适应容器
   myChart.resize()
 }
-
-// 确保图表在页面渲染完成后正确初始化
-onMounted(() => {
-  nextTick(() => {
-    setCharts()
-  })
-})
 
 // 监听窗口或容器尺寸变化，确保图表动态调整
 window.addEventListener('resize', () => {

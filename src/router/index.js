@@ -4,7 +4,6 @@ import LoginIndex from '@/views/Login/LoginIndex.vue'
 import UserList from '@/views/User/UserList.vue'
 import LoginInfo from '@/views/LoginInfo/LoginInfo.vue'
 import BasicInfo from '@/views/LoginInfo/BasicInfo/BasicInfo.vue'
-import CancelAccount from '@/views/LoginInfo/CancelAccount/CancelAccount.vue'
 import ModifyAwator from '@/views/LoginInfo/ModifyAwator/ModifyAwator.vue'
 import PasswordManagement from '@/views/LoginInfo/PasswordManagement/PasswordManagement.vue'
 import SingerList from '@/views/Singer/SingerList.vue'
@@ -51,11 +50,6 @@ const router = createRouter({
               path: 'passwordmanagement',
               component: PasswordManagement,
               name: 'PasswordManagement'
-            },
-            {
-              path: 'cancelaccount',
-              component: CancelAccount,
-              name: 'CancelAccount'
             }
           ]
         },

@@ -4,6 +4,7 @@ import { useLoginerStore } from '@/stores/LoginerStore'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { updateAvatarAPI } from '@/apis/admin'
 import axios from 'axios'
 const LoginerStore = useLoginerStore()
 const currentAwator = ref('')
@@ -13,8 +14,6 @@ const handleError = (error) => {
   let errorMessage = error.message || 'An unknown error occurred'
   // 记录错误信息到控制台
   console.error('An error occurred: ' + errorMessage)
-  // 向用户提供友好的错误提示
-  // alert('Oops! Something went wrong. Please try again later.')
 }
 
 // 上传区
@@ -31,13 +30,13 @@ const handleFileChange = (event) => {
   formData.append('image', file)
   // 调用上传头像的方法 uploadAvatar
   axios
-    .post(`http://119.29.168.176:8080/library_ssm/file/uploadPicture`, formData, {
+    .post(`http://localhost:8080/api/file/uploadImage`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
     .then((response) => {
-      currentAwator.value = response.data.result
+      currentAwator.value = response.data.data
       ElMessage.success({
         message: '上传成功',
         type: 'success'
@@ -53,7 +52,14 @@ const uploadSave = async () => {
   if (currentAwator.value != '') {
     LoginerStore.userInfo.avatar = currentAwator.value
     // 调用修改头像的方法,保存链接
-    // LoginerStore.uploadAvatar(LoginerId.value, currentAwator.value)
+    await updateAvatarAPI({ avatar: currentAwator.value }).then((res) => {
+      if (res.code === 200) {
+        ElMessage.success({
+          message: '更新成功',
+          type: 'success'
+        })
+      }
+    })
     currentAwator.value = ''
   } else {
     centerDialogVisible.value = true

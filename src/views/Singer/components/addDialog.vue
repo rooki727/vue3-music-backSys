@@ -1,17 +1,18 @@
 <script  setup>
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { addSingerAPI } from '@/apis/singer'
 // 弹框功能设置
 const props = defineProps(['dialogFormVisible', 'title', 'clickRow', 'cannotInpId'])
 const centerDialogVisible = computed(() => props.dialogFormVisible)
 const title = computed(() => props.title)
-const emit = defineEmits(['changeDialogVisible', 'updateClickRow'])
+const emit = defineEmits(['changeDialogVisible', 'updateClickRow', 'updateList'])
 const changeDialogVisible = () => {
   emit('changeDialogVisible', false)
 }
 const addFormRef = ref(null)
 const addform = ref({
-  singer_img: '',
+  img: '',
   name: '',
   country: '',
   gender: '',
@@ -52,30 +53,29 @@ const rules = {
 const submitadd = (addFormRef) => {
   addFormRef.validate((valid) => {
     if (valid) {
-      console.log(addform.value)
-
-      resetForm()
       // api数据请求，添加该用户的信息
       emit('changeDialogVisible', false)
 
-      //  addSinger(
-      //       addform.singer_img,
-      //       addform.name,
-      //       addform.country,
-      //       addform.gender,
-      //       addform.birthday
-      //       addform.introduction
-      //     )
-      //     .then(() => {
-      //       // 如果 addUser 没有报错，则执行成功提示
-      //       ElMessage({ type: 'success', message: '添加成功' })
-
-      //     })
-      //     .catch(() => {
-      //       // 处理请求失败的情况
-      //       ElMessage({ type: 'erro', message: '修改失败！请检查输入信息' })
-      //       // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
-      //     })
+      addSingerAPI({
+        img: addform.value.img,
+        name: addform.value.name,
+        country: addform.value.country,
+        gender: addform.value.gender,
+        birthday: addform.value.birthday,
+        introduction: addform.value.introduction
+      })
+        .then(() => {
+          // 如果 addUser 没有报错，则执行成功提示
+          ElMessage({ type: 'success', message: '添加成功' })
+          resetForm()
+          emit('changeDialogVisible', false)
+          emit('updateList')
+        })
+        .catch(() => {
+          // 处理请求失败的情况
+          ElMessage({ type: 'erro', message: '修改失败！请检查输入信息' })
+          // 在此处可以添加相应的错误处理逻辑，例如提示用户登录失败等
+        })
     } else {
       // 如果表单验证不通过，提醒
       ElMessage({ type: 'error', message: '修改失败！请检查输入信息' })
@@ -84,7 +84,7 @@ const submitadd = (addFormRef) => {
 }
 // 上传图片
 const handleAvatarSuccess = (response) => {
-  addform.value.singer_img = response.result
+  addform.value.img = response.data
 }
 // 上传图片前的校验
 const beforeUpload = (file) => {
@@ -111,18 +111,13 @@ const resetForm = () => {
     :close-on-click-modal="false"
   >
     <el-form :model="addform" :rules="rules" ref="addFormRef">
-      <el-form-item label="歌手图片" label-width="8.75rem" prop="singer_img">
+      <el-form-item label="歌手图片" label-width="8.75rem" prop="img">
         <!-- 增加修改图标 -->
         <div style="display: flex">
-          <img
-            style="width: 80px; height: 80px"
-            v-if="addform.singer_img"
-            :src="addform.singer_img"
-            alt=""
-          />
+          <img style="width: 80px; height: 80px" v-if="addform.img" :src="addform.img" alt="" />
           <el-upload
             class="avatar-uploader"
-            action="http://119.29.168.176:8080/library_ssm/file/uploadPicture"
+            action="http://localhost:8080/api/file/uploadImage"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeUpload"

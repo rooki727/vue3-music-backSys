@@ -29,25 +29,17 @@
 import { ref } from 'vue'
 import { useLoginerStore } from '@/stores/LoginerStore'
 import router from '@/router'
+import { adminLoginAPI } from '@/apis/admin'
 const loginerStore = useLoginerStore()
 const inputAccount = ref('')
 const inputPassword = ref('')
-const onClickLogin = () => {
+const onClickLogin = async () => {
   if (inputAccount.value && inputPassword.value) {
-    console.log(111)
-
-    // 发送请求校验
-    loginerStore.userInfo = {
-      account: inputAccount.value,
-      password: inputPassword.value,
-      token: '1234567890tokenText',
-      avatar: '',
-      name: 'adminText',
-      gender: '男',
-      phone: '1234567890',
-      email: '1234567890@qq.com'
+    const res = await adminLoginAPI({ account: inputAccount.value, password: inputPassword.value })
+    if (res.code == '200') {
+      loginerStore.userInfo = res.data
+      router.replace({ path: '/' })
     }
-    router.replace({ path: '/' })
   }
 }
 </script>

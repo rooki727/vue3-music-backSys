@@ -1,9 +1,10 @@
 <script setup>
-import { watch, ref, onMounted, computed } from 'vue'
+import { watch, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { useLoginerStore } from '@/stores/LoginerStore'
 import { useRouter } from 'vue-router'
+import { adminLogoutAPI } from '@/apis/admin'
 const Router = useRouter()
 const LoginerStore = useLoginerStore()
 const circleUrl = '/avatar.jpg'
@@ -75,10 +76,8 @@ const cancelExit = () => {
 }
 const confirmExit = async () => {
   // 执行退出登录操作，例如清除登录信息等
+  await adminLogoutAPI()
   dialogVisible.value = false
-  // 确认退出操作
-  const id = computed(() => LoginerStore.userInfo.id)
-  console.log(id.value)
   // await resetAdminTokenAPI(id.value)
   LoginerStore.clearUser()
   Router.push('/login')

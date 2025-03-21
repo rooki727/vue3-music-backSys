@@ -8,21 +8,19 @@ import { GridComponent } from 'echarts/components'
 import { LineChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
-import { onMounted, nextTick, ref } from 'vue'
+import { nextTick, ref, computed, watch } from 'vue'
 echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition])
-const lineAgeList = ref([
-  { age: 0, value: 0 },
-  { age: 10, value: 10 },
-  { age: 20, value: 88 },
-  { age: 30, value: 44 },
-  { age: 40, value: 22 },
-  { age: 50, value: 9 },
-  { age: 60, value: 7 },
-  { age: 70, value: 5 },
-  { age: 80, value: 4 },
-  { age: 90, value: 3 },
-  { age: 100, value: 1 }
-])
+const lineAgeList = ref([])
+const props = defineProps({
+  ageList: Array
+})
+const ageList = computed(() => props.ageList)
+watch(ageList, (newVal) => {
+  lineAgeList.value = newVal
+  nextTick(() => {
+    setCharts()
+  })
+})
 
 const setCharts = () => {
   const chartBox = document.querySelector('.lineAge')
@@ -52,7 +50,7 @@ const setCharts = () => {
     },
     series: [
       {
-        data: lineAgeList.value.map((item) => item.value),
+        data: lineAgeList.value.map((item) => item.count),
         type: 'line',
         areaStyle: {}
       }
@@ -62,13 +60,6 @@ const setCharts = () => {
   // 手动触发 resize，确保图表尺寸适应容器
   myChart.resize()
 }
-
-// 确保图表在页面渲染完成后正确初始化
-onMounted(() => {
-  nextTick(() => {
-    setCharts()
-  })
-})
 
 // 监听窗口或容器尺寸变化，确保图表动态调整
 window.addEventListener('resize', () => {
